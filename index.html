@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#000000" />
+  <title>MoneyPilot</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+  <div id="errorBar"></div>
+  <div class="nav">
+    <button class="avatar tap" id="btnAvatar" aria-label="Account">M</button>
+    <div class="nav-title">Grok Bot ›</div>
+    <button class="nav-btn tap" id="btnSearch" aria-label="Search">⌕</button>
+    <button class="nav-btn bell tap" id="btnBell" aria-label="Alerts"><span>◉</span><span class="dot" id="bellDot"></span></button>
+  </div>
+  <div class="search-box" id="searchBox"><input id="searchInput" placeholder="Name, symbol or mint" /></div>
+
+  <section class="screen active" id="tab-home">
+    <div class="balance-row">
+      <div class="balance tabular" id="balance">—</div>
+      <span class="pill paper" id="paperPill">PAPER</span>
+    </div>
+    <div class="today"><span id="todayPct" class="tabular">+0.00%</span>
+      <span class="pill mult" id="multPill">1.00×</span>
+    </div>
+    <div class="chart-wrap"><canvas id="homeChart"></canvas></div>
+    <div class="ranges" id="ranges">
+      <button data-r="LIVE" class="on">LIVE</button>
+      <button data-r="1H">1H</button>
+      <button data-r="4H">4H</button>
+      <button data-r="1D">1D</button>
+      <button data-r="1W">1W</button>
+      <button data-r="ALL">ALL</button>
+    </div>
+    <div class="section-h"><span id="agentsLabel">Agents · 5 running</span></div>
+    <div class="carousel" id="agentCarousel"></div>
+    <div class="section-h"><span>Activity</span><span class="link" id="seeAll">See all</span></div>
+    <ul class="list" id="homeActivity"></ul>
+  </section>
+
+  <section class="screen" id="tab-agents">
+    <div id="agentsFull"></div>
+  </section>
+
+  <section class="screen" id="tab-activity">
+    <ul class="list" id="activityList"></ul>
+    <div class="empty" id="activityEmpty" style="display:none">Nothing yet tonight</div>
+  </section>
+
+  <section class="screen" id="tab-account">
+    <div class="note">Plan B · settings, pause and mode are controlled in Telegram. This tab is read-only.</div>
+    <div class="card">
+      <div class="row"><span class="left">Mode</span><span id="acctMode">PAPER</span></div>
+      <div class="row"><span class="left">Stack</span><span id="acctStack" class="tabular">—</span></div>
+      <div class="row"><span class="left">Your FOMO profile</span><a id="acctProfile" href="#" target="_blank" rel="noopener">Open</a></div>
+      <div class="row"><span class="left">Invite a friend</span><button class="tap" id="btnInvite" style="border:0;background:transparent;color:var(--blue)">Share</button></div>
+      <div class="row"><span class="left">Telegram</span><span id="acctTg">connected</span></div>
+      <div class="row"><span class="left">Notifications</span><span class="muted">Telegram only (no web push)</span></div>
+    </div>
+    <div class="card" id="settingsReadonly"></div>
+  </section>
+
+  <div class="overlay" id="coinOverlay">
+    <button class="back tap" id="coinBack">‹ Back</button>
+    <div id="coinBody"></div>
+  </div>
+  <div class="overlay" id="auditOverlay">
+    <button class="back tap" id="auditBack">‹ Back</button>
+    <div id="auditBody"></div>
+  </div>
+
+  <nav class="tabs">
+    <button class="on" data-tab="home"><span class="ico">⌂</span>Home</button>
+    <button data-tab="agents"><span class="ico">◈</span>Agents</button>
+    <button data-tab="activity"><span class="ico">≡</span>Activity</button>
+    <button data-tab="account"><span class="ico">☺</span>Account</button>
+  </nav>
+
+  <script src="chart.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
