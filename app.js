@@ -193,6 +193,31 @@
     });
   }
 
+
+  function renderCopy() {
+    const box = $('copySummary');
+    const openEl = $('copyOpen');
+    const walEl = $('copyWallets');
+    if (!box) return;
+    const c = (state && state.copy) || {};
+    const st = c.stats || {};
+    box.innerHTML = `<h3>Copy follower</h3>
+      <div class="row"><span class="left">Enabled</span><span>${c.enabled ? 'on' : 'off'}</span></div>
+      <div class="row"><span class="left">Size</span><span class="tabular">$${Number(c.size_usd||0).toFixed(2)}</span></div>
+      <div class="row"><span class="left">Max open</span><span>${c.max_open||0}</span></div>
+      <div class="row"><span class="left">Total PnL</span><span class="tabular">$${(st.total_pnl||0).toFixed(2)}</span></div>`;
+    const opens = c.open || [];
+    openEl.innerHTML = opens.length ? opens.map(o =>
+      `<li><div class="title">${esc(o.wallet)}</div><div class="val tabular">$${Number(o.size||0).toFixed(2)}</div>
+       <div class="sub"><a href="${esc(o.link||'#')}" target="_blank" rel="noopener">${esc((o.mint||'').slice(0,8))}</a></div></li>`
+    ).join('') : '<div class="empty">No open copy positions</div>';
+    const ws = c.wallets || [];
+    walEl.innerHTML = ws.length ? ws.map(w =>
+      `<li><div class="title">${esc(w.label||w.address)}</div><div class="val">${w.enabled?'on':'off'}</div>
+       <div class="sub mono">${esc(w.address||'')}</div></li>`
+    ).join('') : '<div class="empty">No wallets — /copy add in Telegram</div>';
+  }
+
   function renderAccount() {
     if (!state) return;
     $('acctMode').textContent = state.mode || 'PAPER';
@@ -320,6 +345,7 @@
       renderAgentsTab();
       renderActivity();
       renderAccount();
+      renderCopy();
       if (state.unread_pushes) $('bellDot').classList.add('on');
       else $('bellDot').classList.remove('on');
     } catch (e) {
