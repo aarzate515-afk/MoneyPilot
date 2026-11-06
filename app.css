@@ -36,6 +36,7 @@ button, a, .tap { min-height: 44px; min-width: 44px; }
   padding: 10px var(--gutter); font-size: 13px;
 }
 #errorBar.show { display: block; }
+#errorBar.soft { background: rgba(235,235,245,0.08); color: var(--secondary); }
 
 .nav {
   display: flex; align-items: center; gap: 10px;

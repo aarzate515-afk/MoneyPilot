@@ -9,6 +9,8 @@
   let retryIn = 5;
   let lastOk = null;
   let timer = null;
+  let fetchFails = 0;
+  let lastStateTs = null;
 
   function $(id) { return document.getElementById(id); }
 
@@ -42,9 +44,10 @@
   function showError(msg) {
     const el = $('errorBar');
     el.textContent = msg;
+    el.classList.remove('soft');
     el.classList.add('show');
   }
-  function clearError() { $('errorBar').classList.remove('show'); }
+  function clearError() { const el=$('errorBar'); el.classList.remove('show'); el.classList.remove('soft'); }
 
   function fmtUsd(n) {
     if (n == null || isNaN(n)) return '—';
@@ -326,33 +329,72 @@
       .replace(/"/g, '&quot;');
   }
 
+  function updatedAgoLabel(ts) {
+    if (!ts) return '';
+    const t = typeof ts === 'number' ? ts : Date.parse(ts);
+    if (!t || isNaN(t)) return '';
+    const mins = Math.max(0, Math.round((Date.now() - t) / 60000));
+    if (mins <= 0) return 'Updated just now';
+    if (mins === 1) return 'Updated 1 min ago';
+    return `Updated ${mins} min ago`;
+  }
+
+  function showSoftStatus(msg) {
+    const el = $('errorBar');
+    el.textContent = msg;
+    el.classList.add('show');
+    el.classList.add('soft');
+  }
+
+  function safeRender(name, fn) {
+    try { fn(); }
+    catch (e) { console.error('render ' + name, e); }
+  }
+
   async function refresh() {
     if (!dataPath) {
       showError('Missing data path. Open the link from Telegram once.');
       return;
     }
+    let st, ch, act;
     try {
-      const [st, ch, act] = await Promise.all([
+      [st, ch, act] = await Promise.all([
         fetchJson('state.json'),
         fetchJson('chart.json'),
         fetchJson('activity.json'),
       ]);
-      state = st; chart = ch; activity = act.rows || act || [];
-      lastOk = new Date();
-      clearError();
-      retryIn = 5;
-      renderHome();
-      renderAgentsTab();
-      renderActivity();
-      renderAccount();
-      renderCopy();
+      fetchFails = 0;
+    } catch (e) {
+      console.error('fetch', e);
+      fetchFails += 1;
+      const t = lastOk ? lastOk.toLocaleTimeString() : 'never';
+      if (fetchFails >= 3) {
+        const el = $('errorBar');
+        el.classList.remove('soft');
+        showError(`Desk offline · retrying in ${retryIn}s · last update ${t}`);
+        retryIn = Math.min(60, retryIn + 5);
+      } else if (lastStateTs) {
+        showSoftStatus(updatedAgoLabel(lastStateTs) + ` · retry ${fetchFails}/3`);
+      }
+      return;
+    }
+    state = st; chart = ch; activity = act.rows || act || [];
+    lastOk = new Date();
+    lastStateTs = state && state.ts;
+    retryIn = 5;
+    safeRender('home', renderHome);
+    safeRender('agents', renderAgentsTab);
+    safeRender('activity', renderActivity);
+    safeRender('account', renderAccount);
+    safeRender('copy', renderCopy);
+    try {
       if (state.unread_pushes) $('bellDot').classList.add('on');
       else $('bellDot').classList.remove('on');
-    } catch (e) {
-      const t = lastOk ? lastOk.toLocaleTimeString() : 'never';
-      showError(`Desk offline · retrying in ${retryIn}s · last update ${t}`);
-      retryIn = Math.min(60, retryIn + 5);
-    }
+    } catch (e) { console.error('bell', e); }
+    // Soft freshness (Pages updates ~every 6 min)
+    const ago = updatedAgoLabel(lastStateTs);
+    if (ago) showSoftStatus(ago);
+    else clearError();
   }
 
   function bind() {
