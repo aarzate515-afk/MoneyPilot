@@ -91,6 +91,7 @@
 
   function scoreRing(canvas, score) {
     const { ctx, w, h } = dpr(canvas);
+    if (w < 8 || h < 8) return;
     ctx.clearRect(0, 0, w, h);
     const cx = w / 2, cy = h / 2, r = Math.max(1, Math.min(w, h) / 2 - 6);
     ctx.lineWidth = 6;
